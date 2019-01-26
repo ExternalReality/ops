@@ -37,8 +37,18 @@ func TestStringNetDev(t *testing.T) {
 
 func TestStringNetDevWithHostPortForwarding(t *testing.T) {
 	testHostPorts := []portfwd{{proto: "tcp", port: 80}, {proto: "tcp", port: 443}}
-	testNetDev := &netdev{nettype: "user", id: "n0", hports: testHostPorts}
-	expected := "-netdev user,id=n0,script=no,downscript=no,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443"
+	testNetDev := &netdev{nettype: "tap", id: "n0", hports: testHostPorts}
+	expected := "-netdev tap,id=n0,script=no,downscript=no,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443"
+	checkQemuString(testNetDev, expected, t)
+}
+
+func TestStringNetDevWithTypeUser(t *testing.T) {
+	// The 'downscript' and 'script' parameters are not valid for 'user'
+	// device type so we don't render them to the string in that case even
+	// if they are populated in the type.
+	testHostPorts := []portfwd{{proto: "tcp", port: 80}, {proto: "tcp", port: 443}}
+	testNetDev := &netdev{nettype: "user", id: "n0", downscript: "no", script: "no", hports: testHostPorts}
+	expected := "-netdev user,id=n0,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443"
 	checkQemuString(testNetDev, expected, t)
 }
 

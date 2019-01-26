@@ -88,16 +88,18 @@ func (nd netdev) String() string {
 	if len(nd.ifname) > 0 {
 		sb.WriteString(fmt.Sprintf(",ifname=%s", nd.ifname))
 	}
-	// if len(nd.script) > 0 {
-	// 	sb.WriteString(fmt.Sprintf(",script=%s", nd.script))
-	// } else {
-	// 	sb.WriteString(",script=no")
-	// }
-	// if len(nd.downscript) > 0 {
-	// 	sb.WriteString(fmt.Sprintf(",downscript=%s", nd.downscript))
-	// } else {
-	// 	sb.WriteString(",downscript=no")
-	// }
+	if nd.nettype != "user" {
+		if len(nd.script) > 0 {
+			sb.WriteString(fmt.Sprintf(",script=%s", nd.script))
+		} else {
+			sb.WriteString(",script=no")
+		}
+		if len(nd.downscript) > 0 {
+			sb.WriteString(fmt.Sprintf(",downscript=%s", nd.downscript))
+		} else {
+			sb.WriteString(",downscript=no")
+		}
+	}
 	for _, hport := range nd.hports {
 		sb.WriteString(fmt.Sprintf(",%s", hport))
 	}
@@ -142,8 +144,6 @@ func (q *qemu) Start(rconfig *RunConfig) error {
 }
 
 func (q *qemu) Args(rconfig *RunConfig) []string {
-	// todo create a qemu from serial
-	args := []string{}
 	boot := drive{path: "image", format: "raw", index: "0"}
 	storage := drive{path: "image", format: "raw", iftype: "virtio"}
 	dev := device{driver: "virtio-net", mac: "7e:b8:7e:87:4a:ea", netdevid: "n0"}
@@ -158,17 +158,23 @@ func (q *qemu) Args(rconfig *RunConfig) []string {
 		dev = device{driver: "virtio-net", netdevid: "n0"}
 		ndev = netdev{nettype: "user", id: "n0", hports: hps}
 	}
-	args = append(args, boot.String())
-	args = append(args, display.String())
-	args = append(args, serial.String())
-	args = append(args, []string{"-nodefaults", "-no-reboot", "-m", rconfig.Memory, "-device", "isa-debug-exit"}...)
-	args = append(args, storage.String())
-	args = append(args, dev.String())
-	args = append(args, ndev.String())
+	args := []string{
+		boot.String(),
+		display.String(),
+		serial.String(),
+		"-nodefaults",
+		"-no-reboot",
+		"-m", rconfig.Memory,
+		"-device", "isa-debug-exit",
+		storage.String(),
+		dev.String(),
+		ndev.String(),
+	}
 	if rconfig.Bridged {
 		args = append(args, "-enable-kvm")
 	}
-	return args
+	// The returned args must tokenized by whitespace
+	return strings.Fields(strings.Join(args, " "))
 }
 
 func newQemu() Hypervisor {
