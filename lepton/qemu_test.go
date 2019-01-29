@@ -1,29 +1,29 @@
 package lepton
 
 import (
-	"strings"
+	. "fmt"
 	"testing"
 )
 
-func TestRenderDriveWithIndex(t *testing.T) {
+func TestStringDriveWithIndex(t *testing.T) {
 	testDrive := &drive{path: "image", format: "raw", index: "0"}
 	expected := "-drive file=image,format=raw,index=0"
-	checkQemuRender(testDrive, expected, t)
+	checkQemuString(testDrive, expected, t)
 }
 
-func TestRenderDriveWithIfType(t *testing.T) {
+func TestStringDriveWithIfType(t *testing.T) {
 	testDrive := &drive{path: "image", format: "raw", iftype: "virtio"}
 	expected := "-drive file=image,format=raw,if=virtio"
-	checkQemuRender(testDrive, expected, t)
+	checkQemuString(testDrive, expected, t)
 }
 
-func TestRenderDevice(t *testing.T) {
+func TestStringDevice(t *testing.T) {
 	testDevice := &device{driver: "virtio-net", mac: "7e:b8:7e:87:4a:ea", netdevid: "n0"}
 	expected := "-device virtio-net,netdev=n0,mac=7e:b8:7e:87:4a:ea"
-	checkQemuRender(testDevice, expected, t)
+	checkQemuString(testDevice, expected, t)
 }
 
-func TestRenderNetDev(t *testing.T) {
+func TestStringNetDev(t *testing.T) {
 	testNetDev := &netdev{
 		nettype:    "tap",
 		id:         "n0",
@@ -32,31 +32,31 @@ func TestRenderNetDev(t *testing.T) {
 		downscript: "no",
 	}
 	expected := "-netdev tap,id=n0,ifname=tap0,script=no,downscript=no"
-	checkQemuRender(testNetDev, expected, t)
+	checkQemuString(testNetDev, expected, t)
 }
 
-func TestRenderNetDevWithHostPortForwarding(t *testing.T) {
+func TestStringNetDevWithHostPortForwarding(t *testing.T) {
 	testHostPorts := []portfwd{{proto: "tcp", port: 80}, {proto: "tcp", port: 443}}
 	testNetDev := &netdev{nettype: "user", id: "n0", hports: testHostPorts}
-	expected := "-netdev user,id=n0,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443"
-	checkQemuRender(testNetDev, expected, t)
+	expected := "-netdev user,id=n0,script=no,downscript=no,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443"
+	checkQemuString(testNetDev, expected, t)
 }
 
-func TestRenderDisplay(t *testing.T) {
+func TestStringDisplay(t *testing.T) {
 	testDisplay := &display{disptype: "none"}
 	expected := "-display none"
-	checkQemuRender(testDisplay, expected, t)
+	checkQemuString(testDisplay, expected, t)
 }
 
-func TestRenderSerial(t *testing.T) {
+func TestStringSerial(t *testing.T) {
 	testSerial := &serial{serialtype: "stdio"}
 	expected := "-serial stdio"
-	checkQemuRender(testSerial, expected, t)
+	checkQemuString(testSerial, expected, t)
 }
 
-func checkQemuRender(qr QemuRender, expected string, t *testing.T) {
-	actual := strings.Join(qr.render(), " ")
+func checkQemuString(qr Stringer, expected string, t *testing.T) {
+	actual := qr.String()
 	if expected != actual {
-		t.Errorf("rendered %q not %q", actual, expected)
+		t.Errorf("Rendered string %q not %q", actual, expected)
 	}
 }

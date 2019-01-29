@@ -9,10 +9,6 @@ import (
 
 const qemuBaseCommand = "qemu-system-x86_64"
 
-type QemuRender interface {
-	render() []string
-}
-
 type drive struct {
 	path   string
 	format string
@@ -57,54 +53,59 @@ type qemu struct {
 	serial  serial
 }
 
-func (d *display) render() []string {
-	return []string{"-display", fmt.Sprintf("%s", d.disptype)}
+func (d display) String() string {
+	return fmt.Sprintf("-display %s", d.disptype)
 }
 
-func (s *serial) render() []string {
-	return []string{"-serial", fmt.Sprintf("%s", s.serialtype)}
+func (s serial) String() string {
+	return fmt.Sprintf("-serial %s", s.serialtype)
 }
 
-func (d *drive) render() []string {
-	str := fmt.Sprintf("file=%s,format=%s", d.path, d.format)
+func (d drive) String() string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("-drive file=%s,format=%s", d.path, d.format))
 	if len(d.index) > 0 {
-		str = str + "," + fmt.Sprintf("index=%s", d.index)
+		sb.WriteString(fmt.Sprintf(",index=%s", d.index))
 	}
 	if len(d.iftype) > 0 {
-		str = str + "," + fmt.Sprintf("if=%s", d.iftype)
+		sb.WriteString(fmt.Sprintf(",if=%s", d.iftype))
 	}
-	return []string{"-drive", str}
+	return sb.String()
 }
 
-func (dv *device) render() []string {
-	str := fmt.Sprintf("%s,netdev=%s", dv.driver, dv.netdevid)
+func (dv device) String() string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("-device %s,netdev=%s", dv.driver, dv.netdevid))
 	if len(dv.mac) > 0 {
-		str = str + "," + fmt.Sprintf("mac=%s", dv.mac)
+		sb.WriteString(fmt.Sprintf(",mac=%s", dv.mac))
 	}
-	return []string{"-device", str}
+	return sb.String()
 }
 
-func (nd *netdev) render() []string {
-	var str string
-	str = fmt.Sprintf("%s,id=%s", nd.nettype, nd.id)
+func (nd netdev) String() string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("-netdev %s,id=%s", nd.nettype, nd.id))
 	if len(nd.ifname) > 0 {
-		str += "," + fmt.Sprintf("ifname=%s", nd.ifname)
+		sb.WriteString(fmt.Sprintf(",ifname=%s", nd.ifname))
 	}
-	if len(nd.script) > 0 {
-		str += "," + fmt.Sprintf("script=%s", nd.script)
-	}
-	if len(nd.downscript) > 0 {
-		str += "," + fmt.Sprintf("downscript=%s", nd.downscript)
-	}
+	// if len(nd.script) > 0 {
+	// 	sb.WriteString(fmt.Sprintf(",script=%s", nd.script))
+	// } else {
+	// 	sb.WriteString(",script=no")
+	// }
+	// if len(nd.downscript) > 0 {
+	// 	sb.WriteString(fmt.Sprintf(",downscript=%s", nd.downscript))
+	// } else {
+	// 	sb.WriteString(",downscript=no")
+	// }
 	for _, hport := range nd.hports {
-		str += "," + hport.render()[0]
+		sb.WriteString(fmt.Sprintf(",%s", hport))
 	}
-	return []string{"-netdev", str}
+	return sb.String()
 }
 
-func (pf *portfwd) render() []string {
-	str := fmt.Sprintf("hostfwd=%s::%v-:%v", pf.proto, pf.port, pf.port)
-	return []string{str}
+func (pf portfwd) String() string {
+	return fmt.Sprintf("hostfwd=%s::%v-:%v", pf.proto, pf.port, pf.port)
 }
 
 func (q *qemu) Stop() {
@@ -157,14 +158,13 @@ func (q *qemu) Args(rconfig *RunConfig) []string {
 		dev = device{driver: "virtio-net", netdevid: "n0"}
 		ndev = netdev{nettype: "user", id: "n0", hports: hps}
 	}
-	args = append(args, display.render()...)
-	args = append(args, serial.render()...)
-	args = append(args, boot.render()...)
-	args = append(args, display.render()...)
+	args = append(args, boot.String())
+	args = append(args, display.String())
+	args = append(args, serial.String())
 	args = append(args, []string{"-nodefaults", "-no-reboot", "-m", rconfig.Memory, "-device", "isa-debug-exit"}...)
-	args = append(args, storage.render()...)
-	args = append(args, dev.render()...)
-	args = append(args, ndev.render()...)
+	args = append(args, storage.String())
+	args = append(args, dev.String())
+	args = append(args, ndev.String())
 	if rconfig.Bridged {
 		args = append(args, "-enable-kvm")
 	}
