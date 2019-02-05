@@ -1,11 +1,13 @@
 package main
 
 import (
-	"net"
+	"context"
 
-	"github.com/d2g/dhcp4"
-	"github.com/d2g/dhcp4client"
-	"github.com/go-errors/errors"
+	"github.com/google/netstack/dhcp"
+	"github.com/google/netstack/tcpip"
+	"github.com/google/netstack/tcpip/network/ipv4"
+	"github.com/google/netstack/tcpip/stack"
+	"github.com/google/netstack/tcpip/transport/udp"
 	"github.com/vishvananda/netlink"
 )
 
@@ -45,47 +47,17 @@ func setupBridgeNetwork() error {
 }
 
 func dhcpAcquireIPAddress(mac string) (string, error) {
-	var err error
+	s := stack.New([]string{ipv4.ProtocolName}, []string{udp.ProtocolName}, stack.Options{})
+
 	// we might need to cache mac before we can
 	// use random mac.
 	//m :=  randomMacAddress()
-	m, _ := net.ParseMAC(mac)
-	//Create a connection to use
-	c, err := dhcp4client.NewPacketSock(2)
-	if err != nil {
-		return "", err
-	}
-	defer c.Close()
-
-	dhcpClient, err := dhcp4client.New(dhcp4client.HardwareAddr(m), dhcp4client.Connection(c))
-	if err != nil {
-		return "", err
-	}
-	defer dhcpClient.Close()
-
-	discoveryPacket, err := dhcpClient.SendDiscoverPacket()
+	m, _ := tcpip.ParseMACAddress(mac)
+	c := dhcp.NewClient(s, tcpip.NICID(1), m, nil)
+	_, err := c.Request(context.Background(), "")
 	if err != nil {
 		return "", err
 	}
 
-	offerPacket, err := dhcpClient.GetOffer(&discoveryPacket)
-	if err != nil {
-		return "", err
-	}
-
-	requestPacket, err := dhcpClient.SendRequest(&offerPacket)
-	if err != nil {
-		return "", err
-	}
-
-	acknowledgementpacket, err := dhcpClient.GetAcknowledgement(&requestPacket)
-	if err != nil {
-		return "", err
-	}
-
-	acknowledgementOptions := acknowledgementpacket.ParseOptions()
-	if dhcp4.MessageType(acknowledgementOptions[dhcp4.OptionDHCPMessageType][0]) != dhcp4.ACK {
-		return "", errors.New("ACK not received")
-	}
-	return acknowledgementpacket.YIAddr().String(), nil
+	return c.Address().String(), nil
 }

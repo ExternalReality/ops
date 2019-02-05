@@ -10,20 +10,17 @@
   version = "v1.0.27"
 
 [[projects]]
-  branch = "master"
-  digest = "1:8b8afaf43926d20ddf59bb9a457cb336fc58dc2d4791aece28a3a46b5ef9bfd7"
-  name = "github.com/d2g/dhcp4"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "a1d1b6c41b1ce8a71a5121a9cee31809c4707d9c"
-
-[[projects]]
-  digest = "1:a176fb8e34c87849ee33daff1d16ce4b1223810a5b93f77abaa8b1732cb898ff"
+  branch = "v2"
+  digest = "1:ebeb837debd82c38d4fa4f965f52aa65dda959420c8538e4dd85b9aa911d51e8"
   name = "github.com/d2g/dhcp4client"
-  packages = ["."]
+  packages = [
+    ".",
+    "connections",
+    "connections/inetsocket",
+    "connections/pktsocket",
+  ]
   pruneopts = "UT"
-  revision = "b7a004ff1a09ab6723625e179a44e476306977a6"
-  version = "v1.0.0"
+  revision = "6f9ae01769fa4c839746aa5d6945ac838fe38745"
 
 [[projects]]
   digest = "1:aacef5f5e45685f2aeda5534d0a750dee6859de7e9088cdd06192787bb01ae6d"
@@ -34,12 +31,56 @@
   version = "v1.0.1"
 
 [[projects]]
+  branch = "master"
+  digest = "1:0bfbe13936953a98ae3cfe8ed6670d396ad81edf069a806d2f6515d7bb6950df"
+  name = "github.com/google/btree"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "4030bb1f1f0c35b30ca7009e9ebd06849dd45306"
+
+[[projects]]
+  branch = "master"
+  digest = "1:9603bc6250db18e5c2b4f25aba3b4c0e2b2e8644df0ff66aaee8971b3560b7f7"
+  name = "github.com/google/netstack"
+  packages = [
+    "dhcp",
+    "ilist",
+    "rand",
+    "sleep",
+    "tcpip",
+    "tcpip/buffer",
+    "tcpip/hash/jenkins",
+    "tcpip/header",
+    "tcpip/network/fragmentation",
+    "tcpip/network/hash",
+    "tcpip/network/ipv4",
+    "tcpip/ports",
+    "tcpip/seqnum",
+    "tcpip/stack",
+    "tcpip/transport/udp",
+    "waiter",
+  ]
+  pruneopts = "UT"
+  revision = "8a654f400a26b7caac64e9911b874a2b18ebd405"
+
+[[projects]]
   digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
   pruneopts = "UT"
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
   version = "v1.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:3f3e9e8c232cf1229cd83cf51388fbb801846f231b24b26917618e10a4c22fbd"
+  name = "github.com/krolaw/dhcp4"
+  packages = [
+    ".",
+    "conn",
+  ]
+  pruneopts = "UT"
+  revision = "7cead472c414711982509839c1a6a324d4c70ce6"
 
 [[projects]]
   digest = "1:0356f3312c9bd1cbeda81505b7fd437501d8e778ab66998ef69f00d7f9b3a0d7"
@@ -56,6 +97,14 @@
   pruneopts = "UT"
   revision = "e6d60cf7ba1f42d86d54cdf5508611c4aafb3970"
   version = "v0.0.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:3bf17a6e6eaa6ad24152148a631d18662f7212e21637c2699bff3369b7f00fa2"
+  name = "github.com/petar/GoLLRB"
+  packages = ["llrb"]
+  pruneopts = "UT"
+  revision = "53be0d36a84c2a886ca057d34b6aa4468df9ccb4"
 
 [[projects]]
   digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
@@ -94,6 +143,19 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:81805c86477e31f08c391598e54e0dae2a71cbbb138ed27ee554177541721100"
+  name = "golang.org/x/net"
+  packages = [
+    "bpf",
+    "internal/iana",
+    "internal/socket",
+    "ipv4",
+  ]
+  pruneopts = "UT"
+  revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
+
+[[projects]]
+  branch = "master"
   digest = "1:969c44c96e9866e912a16e282a362cf045b64202107424983fe8abc3373d1eab"
   name = "golang.org/x/sys"
   packages = ["unix"]
@@ -105,9 +167,12 @@
   analyzer-version = 1
   input-imports = [
     "github.com/cheggaaa/pb",
-    "github.com/d2g/dhcp4",
     "github.com/d2g/dhcp4client",
     "github.com/go-errors/errors",
+    "github.com/google/netstack/dhcp",
+    "github.com/google/netstack/tcpip/network/ipv4",
+    "github.com/google/netstack/tcpip/stack",
+    "github.com/krolaw/dhcp4",
     "github.com/olekukonko/tablewriter",
     "github.com/spf13/cobra",
     "github.com/vishvananda/netlink",
