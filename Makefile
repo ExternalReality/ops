@@ -1,4 +1,3 @@
-
 # Go parameters
 GOCMD=go
 GOBUILD=$(GOCMD) build
@@ -8,9 +7,9 @@ GOGET=$(GOCMD) get
 BINARY_NAME=ops
 
 all: test build
-build: 
+build:
 	$(GOBUILD) -o $(BINARY_NAME) -v
-test: 
+test:
 	$(GOTEST) -v
 clean:
 	$(GOCLEAN)
@@ -19,12 +18,4 @@ run:
 	$(GOBUILD) -o $(BINARY_NAME) -v ./...
 	./$(BINARY_NAME)
 deps:
-	$(GOGET) github.com/spf13/cobra
-	$(GOGET) github.com/vishvananda/netlink
-	$(GOGET) github.com/jstemmer/go-junit-report
-	$(GOGET) github.com/d2g/dhcp4
-	$(GOGET) github.com/d2g/dhcp4client
-	$(GOGET) github.com/go-errors/errors  
-	$(GOGET) github.com/cheggaaa/pb
-	$(GOGET) github.com/olekukonko/tablewriter
-
+	dep ensure -vendor-only
